@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const p = path.join(__dirname, './usuarios.json')
+const p = path.join(__dirname, './database/usuarios.json')
 
 const userRepo = {
     readAll() {
