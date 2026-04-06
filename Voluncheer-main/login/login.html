@@ -83,17 +83,17 @@
         <label class="checkbox-label">
           Sou um representante autorizado da ONG
           <input id="ong-autorizado" type="checkbox" />
-       </label>
+        </label>
 
-       <label class="upload-label" style="display:block; margin-top:8px;">
-        Documento de comprovação (estatuto, certificado):
-        <input id="ong-doc" type="file" accept=".pdf,.jpg,.jpeg,.png" />
-      </label>
+        <label class="upload-label" style="display:block; margin-top:8px;">
+          Documento de comprovação (estatuto, certificado):
+          <input id="ong-doc" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+        </label>
 
-      <label for="email-institucional">Email do representante</label>
-      <input id="email-institucional" type="email" placeholder="Email institucional" />
+        <label for="email-institucional">Email do representante</label>
+        <input id="email-institucional" type="email" placeholder="Email institucional" />
 
-     </div>
+      </div>
 
       <button onclick="cadastrar()">Cadastrar</button>
       <p class="link" onclick="mostrarLogin()">Já tem conta? Faça login</p>
@@ -108,116 +108,125 @@
 
 <script>
 
-    function mostrarCadastro() {
-      document.getElementById("login-section").style.display = "none";
-      document.getElementById("cadastro-section").style.display = "block";
-    }
+  function mostrarCadastro() {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("cadastro-section").style.display = "block";
+  }
 
-    function mostrarLogin() {
-      document.getElementById("cadastro-section").style.display = "none";
-      document.getElementById("login-section").style.display = "block";
-    }
+  function mostrarLogin() {
+    document.getElementById("cadastro-section").style.display = "none";
+    document.getElementById("login-section").style.display = "block";
+  }
 
-    const selectCadTipo = document.getElementById("cad-tipo");
-    const extraOng = document.getElementById("extra-ong");
+  function abrirPainel(user) {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("cadastro-section").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    document.getElementById("dash-titulo").innerText = `Olá, ${user.nome}! Você está logado como ${user.tipo}.`;
+  }
 
-    selectCadTipo.addEventListener("change", function() {
-      extraOng.style.display = selectCadTipo.value === "ong" ? "block" : "none";
-    });
+  const selectCadTipo = document.getElementById("cad-tipo");
+  const extraOng = document.getElementById("extra-ong");
 
-    const cepInput = document.getElementById("cep");
+  selectCadTipo.addEventListener("change", function() {
+    extraOng.style.display = selectCadTipo.value === "ong" ? "block" : "none";
+  });
 
-cepInput.addEventListener("blur", async function () {
+  const cepInput = document.getElementById("cep");
+
+  cepInput.addEventListener("blur", async function () {
     const cep = cepInput.value.replace(/\D/g, '');
 
     if(cep.length !== 8) {
-        alert("CEP inválido");
-        return;
+      alert("CEP inválido");
+      return;
     }
 
     try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
 
-        if(data.erro){
-            alert("CEP não encontrado!");
-            return;
-        }
+      if(data.erro){
+        alert("CEP não encontrado!");
+        return;
+      }
 
-        document.getElementById("rua").value = data.logradouro;
-        document.getElementById("bairro").value = data.bairro;
-        document.getElementById("cidade").value = data.localidade;
-        document.getElementById("estado").value = data.uf;
+      document.getElementById("rua").value = data.logradouro;
+      document.getElementById("bairro").value = data.bairro;
+      document.getElementById("cidade").value = data.localidade;
+      document.getElementById("estado").value = data.uf;
 
     } catch {
-        alert("Erro ao consultar CEP");
+      alert("Erro ao consultar CEP");
     }
-});
+  });
 
-    function cadastrar() {
+  async function cadastrar() {
+    const nome = document.getElementById("cad-nome").value.trim();
+    const email = document.getElementById("cad-email").value.trim();
+    const senha = document.getElementById("cad-senha").value.trim();
+    const tipo = document.getElementById("cad-tipo").value;
 
-      const nome = document.getElementById("cad-nome").value.trim();
-      const email = document.getElementById("cad-email").value.trim();
-      const senha = document.getElementById("cad-senha").value.trim();
-      const tipo = document.getElementById("cad-tipo").value;
+    let dadosExtras = {};
+    if (tipo === "ong") {
+      dadosExtras = {
+        cnpj: document.getElementById("cnpj").value,
+        telefone: document.getElementById("telefone").value,
+        cep: document.getElementById("cep").value,
+        area: document.getElementById("ong-area").value,
+        site: document.getElementById("ong-site").value,
+        descricao: document.getElementById("ong-desc").value
+      };
+    }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const senhaRegex = /^(?=.*\d).{6,}$/;
+    if (!nome || !email || !senha) {
+      alert("Preencha nome, email e senha!");
+      return;
+    }
 
-      if (!emailRegex.test(email)) {
-          alert("Por favor, insira um e-mail válido.");
-          return;
+    const novoUsuario = { nome, email, senha, tipo, ...dadosExtras };
+
+    try {
+      const response = await fetch('http://localhost:3000/cadastrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(novoUsuario)
+      });
+
+      const dados = await response.json();
+      alert(dados.message);
+      if (response.ok) mostrarLogin();
+
+    } catch (error) {
+      alert("Erro ao conectar com o servidor.");
+    }
+  }
+
+  async function login() {
+    const email = document.getElementById("login-email").value.trim();
+    const senha = document.getElementById("login-senha").value.trim();
+    const tipo = document.getElementById("login-tipo").value;
+
+    try {
+      const response = await fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha, tipo })
+      });
+
+      const resultado = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("logado", JSON.stringify(resultado.user));
+        abrirPainel(resultado.user);
+      } else {
+        alert(resultado.message);
       }
-
-      if (!senhaRegex.test(senha)) {
-          alert("A senha deve ter no mínimo 6 caracteres e pelo menos 1 número.");
-          return;
-      }
-
-      if (!nome || !email || !senha) {
-        alert("Preencha nome, email e senha!");
-        return;
-      }
-
-      const usuario = { nome, email, senha, tipo };
-
-      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-      usuarios.push(usuario);
-      localStorage.setItem("usuarios", JSON.stringify(usuarios));
-
-      alert("Cadastro concluído!");
-      mostrarLogin();
+    } catch (error) {
+      alert("Erro ao validar login.");
     }
+  }
 
-    function login() {
-      const email = document.getElementById("login-email").value.trim();
-      const senha = document.getElementById("login-senha").value.trim();
-      const tipo = document.getElementById("login-tipo").value;
-
-      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-      const user = usuarios.find(u => u.email === email && u.senha === senha && u.tipo === tipo);
-
-      if (!user) {
-        alert("Usuário não encontrado!");
-        return;
-      }
-
-      localStorage.setItem("logado", JSON.stringify(user));
-      abrirPainel(user);
-    }
-
-    function abrirPainel(user) {
-      document.getElementById("login-section").style.display = "none";
-      document.getElementById("cadastro-section").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
-      document.getElementById("dash-titulo").innerText = `Olá, ${user.nome}! Você está logado como ${user.tipo}.`;
-    }
-
-    function logout() {
-      localStorage.removeItem("logado");
-      mostrarLogin();
-    }
-    
 </script>
 
 </body>
