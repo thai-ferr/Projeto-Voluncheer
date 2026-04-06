@@ -1,5 +1,5 @@
-import {Router} from "express"
-import { getAllUsers, getVoluntarios, getONGs } from "./controllers/userContrs.js"
+import { Router } from "express"
+import { getAllUsers, getVoluntarios, getONGs } from "../controllers/userContrs.js"
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -13,7 +13,7 @@ userRoutes.get("/ongs",getONGs)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Ajuste o caminho abaixo conforme sua estrutura (Voluncheer-v3/src/database/usuarios.json)
-const p = path.join(__dirname, './database/usuarios.json');
+const p = path.join(__dirname, '../database/usuarios.json');
 
 // Função auxiliar para ler o arquivo
 const lerUsuarios = () => {

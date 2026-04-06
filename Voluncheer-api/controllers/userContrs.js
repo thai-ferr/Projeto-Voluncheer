@@ -1,4 +1,4 @@
-import userRepo from './repository/userRepo.js'
+import userRepo from '../repository/userRepo.js'
 
 export function getAllUsers(req,res){
     const users = userRepo.readAll()
