@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors' // Importe o cors
-import basicRoutes from './basicRoutes.js' 
-import userRoutes from './userRoutes.js'
+import basicRoutes from './routes/basicRoutes.js' 
+import userRoutes from './routes/userRoutes.js'
 
 const app = express()
 
