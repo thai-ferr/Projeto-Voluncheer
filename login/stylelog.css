@@ -98,6 +98,7 @@ label {
   font-size: 26px;
   font-weight: 700;
   background: linear-gradient(90deg, #4A6EDB, #79A7FF);
+  background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 }
