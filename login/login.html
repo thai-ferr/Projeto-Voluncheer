@@ -118,11 +118,11 @@
     document.getElementById("login-section").style.display = "block";
   }
 
-  function abrirPainel(user) {
+  function abrirPainel(nome, tipo) {
     document.getElementById("login-section").style.display = "none";
     document.getElementById("cadastro-section").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
-    document.getElementById("dash-titulo").innerText = `Olá, ${user.nome}! Você está logado como ${user.tipo}.`;
+    document.getElementById("dash-titulo").innerText = `Olá, ${nome}! Você está logado como ${tipo}.`;
   }
 
   const selectCadTipo = document.getElementById("cad-tipo");
@@ -167,34 +167,38 @@
     const senha = document.getElementById("cad-senha").value.trim();
     const tipo = document.getElementById("cad-tipo").value;
 
-    let dadosExtras = {};
-    if (tipo === "ong") {
-      dadosExtras = {
-        cnpj: document.getElementById("cnpj").value,
-        telefone: document.getElementById("telefone").value,
-        cep: document.getElementById("cep").value,
-        area: document.getElementById("ong-area").value,
-        site: document.getElementById("ong-site").value,
-        descricao: document.getElementById("ong-desc").value
-      };
-    }
-
     if (!nome || !email || !senha) {
       alert("Preencha nome, email e senha!");
       return;
     }
 
-    const novoUsuario = { nome, email, senha, tipo, ...dadosExtras };
+    let body;
+    if (tipo === "ong") {
+      body = {
+        email,
+        senha,
+        ds_ong: nome,
+        ds_cnpj: document.getElementById("cnpj").value,
+        tel_ong: document.getElementById("telefone").value,
+        end_ong: document.getElementById("rua").value + ", " + document.getElementById("bairro").value + ", " + document.getElementById("cidade").value,
+        site_ong: document.getElementById("ong-site").value,
+        comp_ong: document.getElementById("ong-desc").value
+      };
+    } else {
+      body = { email, senha, nm_voluntario: nome };
+    }
+
+    const rota = tipo === "ong" ? "ongs" : "voluntarios";
 
     try {
-      const response = await fetch('http://localhost:3000/cadastrar', {
+      const response = await fetch(`http://localhost:3000/${rota}/cadastro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(novoUsuario)
+        body: JSON.stringify(body)
       });
 
       const dados = await response.json();
-      alert(dados.message);
+      alert(dados.mensagem || dados.erro);
       if (response.ok) mostrarLogin();
 
     } catch (error) {
@@ -207,20 +211,23 @@
     const senha = document.getElementById("login-senha").value.trim();
     const tipo = document.getElementById("login-tipo").value;
 
+    const rota = tipo === "ong" ? "ongs" : "voluntarios";
+
     try {
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch(`http://localhost:3000/${rota}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha, tipo })
+        body: JSON.stringify({ email, senha })
       });
 
       const resultado = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("logado", JSON.stringify(resultado.user));
-        abrirPainel(resultado.user);
+        localStorage.setItem("token", resultado.token);
+        localStorage.setItem("tipo", tipo);
+        abrirPainel(email, tipo);
       } else {
-        alert(resultado.message);
+        alert(resultado.erro || resultado.mensagem);
       }
     } catch (error) {
       alert("Erro ao validar login.");
