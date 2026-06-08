@@ -2,9 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import basicRoutes from './basicRoutes.js'
-import userRoutes from './userRoutes.js'
-import eventosRoutes from './eventosRoutes.js'
+import basicRoutes from './voluncheer-api/basicRoutes.js'
+import userRoutes from './voluncheer-api/userRoutes.js'
+import eventosRoutes from './voluncheer-api/eventosRoutes.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname  = path.dirname(__filename)
@@ -15,7 +15,7 @@ app.use(cors())
 app.use(express.json())
 
 // Serve todos os arquivos do frontend em localhost:3000
-app.use(express.static(path.join(__dirname, 'thai-ferr/Projeto-Voluncheer')))
+app.use(express.static(path.join(__dirname, '/Projeto-Voluncheer')))
 
 const PORT = process.env.PORT || 3000
 
