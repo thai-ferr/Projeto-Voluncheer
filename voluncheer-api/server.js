@@ -15,7 +15,7 @@ app.use(cors())
 app.use(express.json())
 
 // Serve todos os arquivos do frontend em localhost:3000
-app.use(express.static(path.join(__dirname, './Projeto-Voluncheer')))
+app.use(express.static(path.join(__dirname, 'thai-ferr/Projeto-Voluncheer')))
 
 const PORT = process.env.PORT || 3000
 
